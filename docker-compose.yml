@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  backend:
+    build: .
+    image: eoi/api-node
+    command: yarn run start
+    volumes:
+      - .:/code
+      - /node_modules
+    ports:
+      - 3000:3000
