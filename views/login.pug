@@ -3,6 +3,8 @@ extends layout.pug
 block content
     h1= Login
 
+    p= "Si hay error mostrarlo con la variable error"
+
     form(method='POST')
         label= "Email"
         input(type="text", name="email")

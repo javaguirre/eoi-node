@@ -1,12 +1,23 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
+const mongoose = require('mongoose');
 
 const router = require("./router");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SECRET = process.env.SECRET || 'verysecret';
+
+console.log(process.env.MONGO_URL);
+mongoose.connect(
+    process.env.MONGO_URL,
+    {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: true,
+        useCreateIndex: true
+    }).catch(err => console.log(err));
 
 app.set('view engine', 'pug');
 app.use(session(
