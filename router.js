@@ -1,5 +1,4 @@
 const express = require("express");
-const session = require("express-session");
 const router = express.Router();
 
 router.get('/', (request, response) => {
@@ -20,8 +19,6 @@ router.get('/admin', (request, response) => {
     } else {
         return response.redirect('/login');
     }
-
-    response.send('Estoy en el admin');
 });
 
 router.get('/login', (request, response) => {
