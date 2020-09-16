@@ -1,8 +1,51 @@
 const express = require("express");
+const session = require("express-session");
 const router = express.Router();
 
 router.get('/', (request, response) => {
-    response.send('{"Hola": "mundo"}');
+    const mysession = request.session;
+
+    if (mysession.email) {
+        return response.redirect('/admin');
+    }
+
+    response.render('index');
+});
+
+router.get('/admin', (request, response) => {
+    const session = request.session;
+
+    if (session.email) {
+        response.render('admin', { email: session.email })
+    } else {
+        return response.redirect('/login');
+    }
+
+    response.send('Estoy en el admin');
+});
+
+router.get('/login', (request, response) => {
+    const session = request.session;
+
+    if (session.email) {
+        return response.redirect('/admin');
+    }
+
+    response.render('login');
+});
+
+router.post('/login', (request, response) => {
+    request.session.email = request.body.email;
+    return response.redirect('/admin');
+});
+
+router.get('/logout', (request, response) => {
+    request.session.destroy((err) => {
+        if (err) {
+            console.log(err);
+        }
+        response.redirect('/');
+    })
 });
 
 // POST CRUD API
@@ -14,6 +57,8 @@ router.use((request, response, next) => {
 });
 
 router.post(POST_ENDPOINT, (request, response) => {
+    const post = request.body;
+    // TODO Save it somewhere
     response.send('POST');
 });
 

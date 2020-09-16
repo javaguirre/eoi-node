@@ -1,0 +1,10 @@
+extends layout.pug
+
+block content
+    h1= Login
+
+    form(method='POST')
+        label= "Email"
+        input(type="text", name="email")
+        br
+        input(type="submit", value="Login")
