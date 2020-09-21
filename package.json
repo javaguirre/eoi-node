@@ -19,13 +19,20 @@
   },
   "homepage": "https://github.com/javaguirre/eoi-node#readme",
   "dependencies": {
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "http-status-codes": "^2.1.4",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.2",
     "mongoose": "^5.10.5",
     "node-fetch": "^2.6.1",
     "nodemon": "^2.0.4",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
     "pug": "^3.0.0"
   }
 }
