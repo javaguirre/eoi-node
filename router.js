@@ -7,7 +7,9 @@ const Post = require("./models/post");
 const ApiErrorResponse = require("./api_errors");
 const AuthenticationService = require("./auth");
 
+// TODO Separate routers specific files
 const router = express.Router();
+const apiRouter = express.Router();
 
 // TODO Move routes for auth to another file
 // TODO Move API routes to another file
@@ -74,20 +76,22 @@ router.post(
 );
 
 router.post("/api_login", async (req, res, next) => {
-  passport.authenticate("login", async (err, user, info) => {
+  passport.authenticate("login", async (error, user, info) => {
     try {
-      if (err || !user) {
-        const error = new Error("An Error occurred");
+      if (error) {
         return next(error);
       }
+
+      if (!user) {
+        return next(new Error('No user'));
+      }
+
       req.login(user, { session: false }, async (error) => {
         if (error) return next(error);
-        //We don't want to store the sensitive information such as the
-        //user password in the token so we pick only the email and id
+
         const body = { _id: user._id, email: user.email };
-        //Sign the JWT token and populate the payload with the user email and id
-        const token = jwt.sign({ user: body }, "top_secret");
-        //Send back the token to the user
+        const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
+
         return res.json({ token });
       });
     } catch (error) {
@@ -98,20 +102,20 @@ router.post("/api_login", async (req, res, next) => {
 
 // POST CRUD API
 
-const POST_ENDPOINT = "/api/v1/posts";
+const POST_ENDPOINT = "/v1/posts";
 
-router.use((request, response, next) => {
-  console.log(`Router Time: ${Date.now()}`);
+apiRouter.use((request, response, next) => {
+  console.log(`API Time: ${Date.now()}`);
   next();
 });
 
-router.post(POST_ENDPOINT, (request, response) => {
+apiRouter.post(POST_ENDPOINT, (request, response) => {
   const postObj = new Post(request.body);
   postObj.save((err) => (err ? console.log(err) : null));
   response.send(postObj);
 });
 
-router.get(POST_ENDPOINT, (request, response) => {
+apiRouter.get(POST_ENDPOINT, (request, response) => {
   Post.find({})
     .then((data) => {
       return response.send(data);
@@ -122,7 +126,9 @@ router.get(POST_ENDPOINT, (request, response) => {
     });
 });
 
-router.get(`${POST_ENDPOINT}/:slug`, (request, response) => {
+apiRouter.get(
+  `${POST_ENDPOINT}/:slug`,
+  (request, response) => {
   Post.findOne({ slug: request.params.slug })
     .then((data) => {
       if (!data) {
@@ -137,7 +143,7 @@ router.get(`${POST_ENDPOINT}/:slug`, (request, response) => {
     });
 });
 
-router.put(`${POST_ENDPOINT}/:slug`, (request, response) => {
+apiRouter.put(`${POST_ENDPOINT}/:slug`, (request, response) => {
   // TODO Validation request.json() and throw ValidationError
   // StatusCodes.BAD_REQUEST
 
@@ -155,7 +161,7 @@ router.put(`${POST_ENDPOINT}/:slug`, (request, response) => {
     });
 });
 
-router.delete(`${POST_ENDPOINT}/:slug`, (request, response) => {
+apiRouter.delete(`${POST_ENDPOINT}/:slug`, (request, response) => {
   Post.findOneAndDelete({ slug: request.params.slug }, request.body)
     .then((data) => {
       if (!data) {
@@ -171,4 +177,6 @@ router.delete(`${POST_ENDPOINT}/:slug`, (request, response) => {
     });
 });
 
-module.exports = router;
+module.exports = {
+  router, apiRouter
+};

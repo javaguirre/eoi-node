@@ -4,13 +4,16 @@ const session = require("express-session");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const localStrategy = require("passport-local").Strategy;
+const JWTStrategy = require("passport-jwt").Strategy;
+const ExtractJWT = require("passport-jwt").ExtractJwt;
 
 const User = require("./models/user");
+
+require("dotenv").config();
 
 // PASSPORT
 // TODO Move auth to an auth.js file
 passport.use(
-
   "signup",
   new localStrategy(
     {
@@ -58,7 +61,23 @@ passport.use(
   )
 );
 
-const router = require("./router");
+passport.use(
+  new JWTStrategy(
+    {
+      secretOrKey: process.env.JWT_SECRET,
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+    },
+    async (token, done) => {
+      try {
+        return done(null, token.user);
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
+);
+
+const routers = require("./router");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,6 +97,10 @@ app.set("view engine", "pug");
 app.use(session({ secret: SECRET, saveUninitialized: true, resave: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/", router);
+app.use("/", routers.router);
+app.use(
+  "/api",
+  passport.authenticate('jwt', {session: false}),
+  routers.apiRouter);
 app.listen(PORT, "0.0.0.0");
 console.log(`Escuchando en http://localhost:${PORT}`);
