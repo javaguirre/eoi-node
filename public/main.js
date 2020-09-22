@@ -5,7 +5,7 @@ const socket = io.connect(
     { forceNew: true });
 
 const render = (data) => {
-    const html = data.map((elem, index) => `<li>${elem.text}</li>`).join(' ');
+    const html = data.map((elem, index) => `<li>${elem.username}: ${elem.text}</li>`).join(' ');
     document.getElementById('messages').innerHTML = html;
 };
 
@@ -14,16 +14,16 @@ socket.on('messages', data => {
 })
 
 const sendMessage = function(e) {
-    e.preventDefault();
     console.log('SEND');
 
     const text = document.getElementById('message_input').value
+    const username = document.getElementById('username').value
 
     if (!text) {
         return
     }
 
-    const message = { text };
+    const message = { text, username };
 
     socket.emit('new-message', message);
 }

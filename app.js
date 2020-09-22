@@ -84,14 +84,18 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
+let messages = [
+  {username: 'javi', text: 'Hola'},
+  {username: 'javi', text: 'Prueba mensajes'}];
+
 io.on('connection', (socket) => {
-  socket.emit(
-    'messages',
-    [{text: 'Hola'}, {text: 'Prueba mensajes'}]
-  );
+  socket.emit('messages', messages);
 
   socket.on('new-message', (data) => {
     console.log(`Ha llegado un nuevo mensaje: ${data.text}`);
+    messages.push(data);
+
+    socket.emit('messages', messages);
   });
 });
 

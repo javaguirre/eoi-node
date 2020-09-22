@@ -3,9 +3,13 @@ extends layout.pug
 block content
     ul#messages
 
-    form(onsubmit="return sendMessage(this)")
-        input#message_input(type="text", name="message")
-        input(type="submit", value="Enviar")
+    label= "Usuario"
+    input#username(type="text", name="username")
+    br
+    label= "Mensaje"
+    input#message_input(type="text", name="message")
+    br
+    button(onclick="return sendMessage(this)")= "Enviar"
 
     script(src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js")
     script(src="main.js")
