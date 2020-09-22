@@ -8,6 +8,8 @@ const JWTStrategy = require("passport-jwt").Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
 
 const User = require("./models/user");
+const routers = require("./router");
+const chatRouter = require("./routes/chat");
 
 require("dotenv").config();
 
@@ -77,13 +79,25 @@ passport.use(
   )
 );
 
-const routers = require("./router");
 
 const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
+io.on('connection', (socket) => {
+  socket.emit(
+    'messages',
+    [{text: 'Hola'}, {text: 'Prueba mensajes'}]
+  );
+
+  socket.on('new-message', (data) => {
+    console.log(`Ha llegado un nuevo mensaje: ${data.text}`);
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 const SECRET = process.env.SECRET || "verysecret";
 
-console.log(process.env.MONGO_URL);
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
@@ -95,6 +109,7 @@ mongoose
 
 app.set("view engine", "pug");
 app.use(session({ secret: SECRET, saveUninitialized: true, resave: true }));
+app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", routers.router);
@@ -102,5 +117,7 @@ app.use(
   "/api",
   passport.authenticate('jwt', {session: false}),
   routers.apiRouter);
-app.listen(PORT, "0.0.0.0");
+app.use('/chat', chatRouter);
+
+server.listen(PORT, "0.0.0.0");
 console.log(`Escuchando en http://localhost:${PORT}`);
